@@ -1,14 +1,9 @@
 import SliderExport from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { products } from "../../data/products.js";
 
 const Slider = SliderExport.default ?? SliderExport;
-
-const productImages = Object.entries(
-  import.meta.glob("../../assets/product/*.jpeg", { eager: true, import: "default" })
-)
-  .sort(([a], [b]) => Number(a.match(/\d+/)?.[0]) - Number(b.match(/\d+/)?.[0]))
-  .map(([, src]) => src);
 
 const sliderSettings = {
   dots: true,
@@ -33,11 +28,11 @@ function ProductSlider() {
         <h2 className="mb-8 text-2xl font-semibold">منتجاتنا</h2>
         <div className="product-slider" dir="ltr">
           <Slider {...sliderSettings}>
-            {productImages.map((src, index) => (
-              <div key={src}>
+            {products.map((product) => (
+              <div key={product.id}>
                 <img
-                  src={src}
-                  alt={`منتج ${index + 1}`}
+                  src={product.image}
+                  alt={product.name}
                   className="mx-auto h-[420px] w-full object-contain sm:h-[480px]"
                 />
               </div>

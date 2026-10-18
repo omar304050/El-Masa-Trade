@@ -1,5 +1,5 @@
 const images = Object.entries(
-  import.meta.glob("../assets/product/*.jpeg", { eager: true, import: "default" })
+  import.meta.glob("../assets/product/*.png", { eager: true, import: "default" })
 )
   .sort(([a], [b]) => Number(a.match(/\d+/)?.[0]) - Number(b.match(/\d+/)?.[0]))
   .map(([, src]) => src);
