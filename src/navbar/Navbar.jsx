@@ -19,7 +19,7 @@ const departments = [
   { label: "لوحات كهرباء", hint: "توزيع وتحكم" },
 ];
 
-function Navbar({ cartCount = 0 }) {
+function Navbar({ cartCount = 5 }) {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
