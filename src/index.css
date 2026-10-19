@@ -1,13 +1,76 @@
 @import "tailwindcss";
 
+.product-slider {
+  margin-bottom: 2rem;
+}
+
+.product-slider .slick-list {
+  overflow: hidden;
+}
+
+.home-slider .slick-arrow:before,
+.home-slider .slick-prev:before,
+.home-slider .slick-next:before {
+  content: none !important;
+  display: none !important;
+}
+
 .product-slider .slick-slide > div {
   padding-inline: 8px;
 }
 
-.product-slider .slick-prev:before,
-.product-slider .slick-next:before {
+.product-slider .slick-slide img {
+  width: auto;
+  margin-inline: auto;
+}
+
+.product-slider .slick-dots {
+  bottom: -2rem;
+}
+
+.home-slider .slick-prev {
+  left: 4px;
+  z-index: 2;
+}
+
+.home-slider .slick-next {
+  right: 4px;
+  z-index: 2;
+}
+
+.details-slider {
+  position: relative;
+  padding-inline: 2.25rem;
+}
+
+.details-slider .slick-prev,
+.details-slider .slick-next {
+  z-index: 2;
+}
+
+.details-slider .slick-prev {
+  left: 0;
+}
+
+.details-slider .slick-next {
+  right: 0;
+}
+
+.details-slider .slick-prev:before,
+.details-slider .slick-next:before {
   color: #0b2548;
-  font-size: 28px;
+  font-size: 24px;
+  opacity: 1;
+}
+
+@media (max-width: 767px) {
+  .product-slider {
+    margin-bottom: 0;
+  }
+
+  .product-slider .slick-dots {
+    display: none !important;
+  }
 }
 
 .product-slider .slick-dots li button:before {

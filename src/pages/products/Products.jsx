@@ -1,14 +1,19 @@
 import { useState, useEffect } from "react";
 import { getProducts } from "../../services/products.service.js";
 import ProductCard from "../../components/ProductCard/ProductCard.jsx";
+import Loader from "../../components/loader/loader.jsx";
 
 function Products() {
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getProducts().then((data) => setProducts(data));
-    console.log(products);
+    getProducts()
+      .then((data) => setProducts(data))
+      .finally(() => setLoading(false));
   }, []);
+
+  if (loading) return <Loader />;
 
   return (
     <section dir="rtl" className="font-['Cairo'] text-[#1c1915]">

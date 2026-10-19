@@ -8,12 +8,15 @@ import { getProductById, getProducts } from "../../services/products.service";
 const Slider = SliderExport.default ?? SliderExport;
 
 const imageSlider = {
-  dots: true,
+  dots: false,
   infinite: true,
   speed: 500,
   slidesToShow: 3,
   slidesToScroll: 1,
   arrows: true,
+  responsive: [
+    { breakpoint: 640, settings: { slidesToShow: 2 } },
+  ],
 };
 
 const categories = {
@@ -65,9 +68,9 @@ function ProductDetails() {
           <span className="font-semibold text-[#252d35]">{product.name}</span>
         </nav>
 
-        <div className="mt-4 grid items-start gap-5 lg:grid-cols-2">
+        <div className="mt-4  grid items-start gap-5 lg:grid-cols-2">
           <div>
-            <div className="relative flex h-72 items-center justify-center overflow-hidden rounded-3xl border border-[#e8e2d8] bg-white p-5 sm:h-80">
+            <div className="relative  flex h-72 items-center justify-center overflow-hidden rounded-3xl border border-[#e8e2d8] bg-white p-5 sm:h-80">
               {hasDiscount && (
                 <span className="absolute left-4 top-4 rounded-full bg-[#98764e] px-3 py-1 text-xs font-bold text-white">
                   خصم {percentage}%
@@ -77,7 +80,7 @@ function ProductDetails() {
             </div>
 
             {(images.length > 1 || products.length > 0) && (
-            <div className="product-slider mt-4" dir="ltr">
+            <div className="product-slider details-slider mt-4" dir="ltr">
               <Slider {...imageSlider} infinite={(images.length > 1 ? images.length : products.length) > 3}>
                 {images.length > 1
                   ? images.map((image, index) => (
