@@ -4,6 +4,9 @@ import SliderExport from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { getProductById, getProducts } from "../../services/products.service";
+import { useQuery } from "@tanstack/react-query";
+
+import Loader from "../../components/loader/loader.jsx";
 
 const Slider = SliderExport.default ?? SliderExport;
 
@@ -19,6 +22,8 @@ const imageSlider = {
   ],
 };
 
+
+
 const categories = {
   motors: "مواتر",
   pumps: "طلمبات",
@@ -28,25 +33,49 @@ const categories = {
 
 function ProductDetails() {
   const { id } = useParams();
-  const [product, setProduct] = useState(null);
-  const [products, setProducts] = useState([]);
   const [imageIndex, setImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
 
-  useEffect(() => {
-    getProductById(id).then((response) => {
-      setProduct(response.data);
-      setImageIndex(0);
-    });
-  }, [id]);
-
-  useEffect(() => {
-    getProducts().then((response) => setProducts(response.data || []));
-  }, []);
-
-  if (!product) {
-    return <p className="p-10 text-center font-['Cairo']">جاري تحميل المنتج...</p>;
+  const {
+    data: product,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["product", id],
+    queryFn: () =>  getProductById(id),
+  });
+  
+  const {
+    data: products,
+    isLoading: isLoadingProducts,
+    isError: isErrorProducts,
+    error: errorProducts,
+  } = useQuery({
+    queryKey: ["products"],
+    queryFn: () => getProducts(),
+  });
+  
+  if (isLoading) return <Loader />;
+  
+  if (isError) {
+    return <p>حصل خطأ: {error.message}</p>;
   }
+  
+  if (!product) {
+    return <p>المنتج غير موجود</p>;
+  }
+  
+  if (isLoadingProducts) return <Loader />;
+  
+  if (isErrorProducts) {
+    return <p>حصل خطأ: {errorProducts.message}</p>;
+  }
+  
+  if (!products) {
+    return <p>المنتجات غير موجودة</p>;
+  }
+
 
   const images = product.images || [];
   const price = Number(product.price) || 0;

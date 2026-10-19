@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import logo from "../assets/mainIcon.png";
+import DiamondLogo from "../components/DiamondLogo/DiamondLogo.jsx";
 
 const links = [
   { to: "/", label: "الرئيسية", end: true },
@@ -19,7 +19,7 @@ const departments = [
   { label: "لوحات كهرباء", hint: "توزيع وتحكم" },
 ];
 
-function Navbar({ cartCount = 5 }) {
+function Navbar({ cartCount = 0 }) {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -58,13 +58,9 @@ function Navbar({ cartCount = 5 }) {
 
       <div className="border-b border-[#e6dfd4] bg-[#fbf8f3]">
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:px-6 lg:gap-6">
-          <NavLink to="/" onClick={closeMenus} className="flex shrink-0 items-center gap-2.5">
-            <span className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-2xl bg-[#16130f] p-1 shadow-[0_8px_16px_rgba(22,19,15,0.14),inset_0_0_0_1px_rgba(212,168,74,0.55)]">
-              <img
-                src={logo}
-                alt=""
-                className="size-full origin-center scale-[1.42] rounded-full object-cover"
-              />
+          <NavLink to="/" onClick={closeMenus} className="flex shrink-0 items-center gap-1">
+            <span className="grid size-11 shrink-0 -translate-y-[3px] place-items-center overflow-hidden">
+              <DiamondLogo />
             </span>
             <span className="leading-none">
               <span className="block text-[18px] font-extrabold tracking-tight text-[#1c1915]">ماسة تريد</span>

@@ -16,6 +16,11 @@ function ProductCard({ product }) {
   const finalPrice = hasDiscount ? price * (1 - percentage / 100) : price;
   const inStock = Number(item.stock) > 0;
 
+  const optimizedImage = image?.replace(
+    "/upload/",
+    "/upload/f_auto,q_auto,w_500/"
+  );
+
   return (
     <Link
       to={`/productdetails/${item._id}`}
@@ -37,7 +42,7 @@ function ProductCard({ product }) {
         )}
 
         <img
-          src={image}
+          src={optimizedImage}
           alt={item.name}
           className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-110"
           loading="lazy"

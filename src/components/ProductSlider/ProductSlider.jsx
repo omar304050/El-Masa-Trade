@@ -32,7 +32,7 @@ function SliderArrow({ className, style, onClick, direction }) {
     >
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
         <path
-          d={next ? "M7 4l5 5-5 5" : "M11 4L6 9l5 5"}
+          d={next ? "M11 4L6 9l5 5" : "M7 4l5 5-5 5"}
           stroke="#0b2548"
           strokeWidth="1.8"
           strokeLinecap="round"
