@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { getProducts } from "../../services/products.service.js";
 import ProductCard from "../../components/ProductCard/ProductCard.jsx";
 import Loader from "../../components/loader/loader.jsx";
+import { useProductContext } from "../../context/ProductContext.jsx";
 
 function salePrice(product) {
   const price = Number(product.price) || 0;
@@ -11,17 +11,11 @@ function salePrice(product) {
 }
 
 function Products() {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [sort, setSort] = useState("");
 
-  useEffect(() => {
-    getProducts()
-      .then((data) => setProducts(data))
-      .finally(() => setLoading(false));
-  }, []);
+const {  products, isLoading, error } = useProductContext();
 
-  if (loading) return <Loader />;
+  if (isLoading) return <Loader />;
 
   const list = [...(products?.data || [])].sort((a, b) => {
     if (sort === "high") return salePrice(b) - salePrice(a);
