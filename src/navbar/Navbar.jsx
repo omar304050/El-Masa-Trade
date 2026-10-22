@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import DiamondLogo from "../components/DiamondLogo/DiamondLogo.jsx";
+import { useCart } from "../context/cartContext.jsx";
 
 const links = [
   { to: "/", label: "الرئيسية", end: true },
@@ -19,7 +20,12 @@ const departments = [
   { label: "لوحات كهرباء", hint: "توزيع وتحكم" },
 ];
 
-function Navbar({ cartCount = 0 }) {
+
+
+function Navbar(  ) {
+  const { cartData } = useCart();
+  const cartCount = cartData?.totalQuantity || 0;
+  console.log("cartCount:", cartCount);
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);

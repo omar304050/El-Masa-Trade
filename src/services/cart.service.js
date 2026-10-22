@@ -16,18 +16,18 @@ export const loadCart = async () => {
   return getCart(id);
 };
 
-export const addToCart = async (productId , cartId) => {
-  const response = await axiosInstance.post("/api/cartId", { productId });
+export const addToCart = async (productId , cartId , quantity) => {
+  const response = await axiosInstance.post(`/api/cart/${cartId}`, { productId , quantity });
   return response.data;
 };
 
-// export const removeFromCart = async (productId) => {
-//   const response = await axiosInstance.delete(`/api/cart/${productId}`);
-//   return response.data;
-// };
+export const removeFromCart = async (productId) => {
+  const response = await axiosInstance.delete(`/api/cart/${productId}`);
+  return response.data;
+};
 
-// export const clearCart = async () => {
-//   const response = await axiosInstance.delete("/api/cart");
-//   return response.data;
-// };
+export const clearCart = async () => {
+  const response = await axiosInstance.delete("/api/cart");
+  return response.data;
+};
 

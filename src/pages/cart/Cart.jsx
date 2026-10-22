@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { clearCart, loadCart, removeFromCart } from "../../services/cart.service";
+import { clearCart, loadCart, removeFromCart , getCart , createCart } from "../../services/cart.service";
 import Loader from "../../components/loader/loader.jsx";
 import Breadcrumb from "../../components/Breadcrumb/Breadcrumb.jsx";
+import { useEffect } from "react";
 
 function money(value) {
   return Number(value || 0).toLocaleString("en-EG", { maximumFractionDigits: 1 });
@@ -17,11 +18,16 @@ function salePrice(product) {
 
 function Cart() {
   const queryClient = useQueryClient();
+  const cartId = localStorage.getItem("cartId");
+  console.log("cartId:", cartId);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["cart"],
-    queryFn: loadCart,
+    queryFn: () => getCart(cartId),
+    enabled: !!cartId 
   });
+
+
 
   const removeItem = useMutation({
     mutationFn: removeFromCart,
@@ -33,7 +39,7 @@ function Cart() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cart"] }),
   });
 
-  // if (isLoading) return <Loader />;
+  if (isLoading) return <Loader />;
 
   if (isError) {
     return <p className="p-10 text-center font-['Cairo']">حصل خطأ: {error.message}</p>;

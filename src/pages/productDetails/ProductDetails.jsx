@@ -5,7 +5,9 @@ import { useQuery } from "@tanstack/react-query";
 import Loader from "../../components/loader/loader.jsx";
 import Breadcrumb from "../../components/Breadcrumb/Breadcrumb.jsx";
 import Dialog from "../../components/Dialog/Dialog.jsx";
-import { addToCart , loadCart } from "../../services/cart.service";
+import { addToCart  } from "../../services/cart.service";
+import toast, { Toaster } from "react-hot-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 
 
@@ -20,12 +22,8 @@ function ProductDetails() {
   const { id } = useParams();
   const [quantity, setQuantity] = useState(1);
   const [imageOpen, setImageOpen] = useState(false);
-  const {data: cart}= useQuery({
-    queryKey: ["cart"],
-    queryFn: loadCart,
-  })
-  const cartId = cart?.cartId || cart?.cart?.cartId;
-
+  const cartId = localStorage.getItem("cartId");
+  const queryClient = useQueryClient();
   const {
     data: product,
     isLoading,
@@ -134,7 +132,15 @@ function ProductDetails() {
               </div>
 
               <button
-                onClick={() => addToCart(id , cartId)}
+                onClick={() => {
+                  addToCart(id , cartId , quantity).then(() => {
+                    queryClient.invalidateQueries({ queryKey: ["cart"] });
+                    toast.success("تم إضافة المنتج إلى السلة");
+                  }).catch((error) => {
+                    console.log("error:", error);
+                    toast.error("حصل خطأ أثناء إضافة المنتج إلى السلة");
+                  });
+                }}
                 type="button"
                 disabled={!inStock}
                 className="h-10 flex-1 rounded-xl bg-[#273746] px-6 text-sm font-bold text-white transition hover:bg-[#98764e] disabled:cursor-not-allowed disabled:bg-[#cfc8be]
