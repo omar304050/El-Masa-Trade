@@ -1,29 +1,23 @@
 import { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import DiamondLogo from "../components/DiamondLogo/DiamondLogo.jsx";
 import { useCart } from "../context/cartContext.jsx";
+import { useProductContext } from "../context/ProductContext.jsx";
 
 const links = [
   { to: "/", label: "الرئيسية", end: true },
   { to: "/products", label: "المنتجات" },
-  { to: "/categories", label: "الأقسام" },
-  { to: "/brands", label: "الماركات" },
+  // { to: "/categories", label: "الأقسام" },
+  // { to: "/brands", label: "الماركات" },
   { to: "/allorders", label: "طلباتي" },
 ];
 
-const departments = [
-  { label: "مواتر", hint: "أحادي وثلاثي الوجه" },
-  { label: "طلمبات", hint: "مياه، صرف، غاطسة" },
-  { label: "قواطع وكونتاكتور", hint: "حماية وتحكم" },
-  { label: "كابلات", hint: "نحاس وألومنيوم" },
-  { label: "إضاءة", hint: "صناعي وتجاري" },
-  { label: "لوحات كهرباء", hint: "توزيع وتحكم" },
-];
-
-
-
-function Navbar(  ) {
+function Navbar() {
   const { cartData } = useCart();
+  const { products } = useProductContext();
+  const [searchParams] = useSearchParams();
+  const selectedCategory = searchParams.get("category") || "";
+  const departments = [...new Set((products?.data || []).map((product) => product.category).filter(Boolean))];
   const cartCount = cartData?.totalQuantity || 0;
   console.log("cartCount:", cartCount);
   const navigate = useNavigate();
@@ -39,7 +33,7 @@ function Navbar(  ) {
   }
 
   function closeMenus() {
-    setMenuOpen(false);
+    setMenuOpen(false);  
     setDepartmentsOpen(false);
   }
 
@@ -147,17 +141,26 @@ function Navbar(  ) {
             </button>
             {departmentsOpen && (
               <div className="absolute inset-s-0 top-full z-20 w-72 border border-[#e6dfd4] bg-white p-2 shadow-[0_18px_40px_rgba(28,25,21,0.12)]">
+                <NavLink
+                  to="/products"
+                  onClick={closeMenus}
+                  className={`flex items-center justify-between rounded-lg px-3 py-2.5 transition hover:bg-[#f7f1e7] ${
+                    !selectedCategory ? "bg-[#f7f1e7] text-[#9a5b16]" : ""
+                  }`}
+                >
+                  <span className="text-sm font-bold">الكل</span>
+                  <span className="text-[#d4893a]">‹</span>
+                </NavLink>
                 {departments.map((item) => (
                   <NavLink
-                    key={item.label}
-                    to="/categories"
+                    key={item}
+                    to={`/products?category=${encodeURIComponent(item)}`}
                     onClick={closeMenus}
-                    className="flex items-center justify-between rounded-lg px-3 py-2.5 transition hover:bg-[#f7f1e7]"
+                    className={`flex items-center justify-between rounded-lg px-3 py-2.5 transition hover:bg-[#f7f1e7] ${
+                      selectedCategory === item ? "bg-[#f7f1e7] text-[#9a5b16]" : ""
+                    }`}
                   >
-                    <span>
-                      <span className="block text-sm font-bold">{item.label}</span>
-                      <span className="block text-xs text-[#8a7d6b]">{item.hint}</span>
-                    </span>
+                    <span className="text-sm font-bold">{item}</span>
                     <span className="text-[#d4893a]">‹</span>
                   </NavLink>
                 ))}
@@ -225,13 +228,12 @@ function Navbar(  ) {
           <div className="mt-2 grid grid-cols-2 gap-2">
             {departments.map((item) => (
               <NavLink
-                key={item.label}
-                to="/categories"
+                key={item}
+                to={`/products?category=${encodeURIComponent(item)}`}
                 onClick={closeMenus}
                 className="rounded-xl border border-[#e6dfd4] bg-white px-3 py-3"
               >
-                <span className="block text-sm font-bold">{item.label}</span>
-                <span className="block text-[11px] text-[#8a7d6b]">{item.hint}</span>
+                <span className="block text-sm font-bold">{item}</span>
               </NavLink>
             ))}
           </div>
