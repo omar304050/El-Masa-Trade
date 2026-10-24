@@ -224,19 +224,6 @@ function Navbar() {
               حسابي
             </NavLink>
           </div>
-          <p className="mt-4 px-3 text-xs font-bold text-[#8a7d6b]">الأقسام</p>
-          <div className="mt-2 grid grid-cols-2 gap-2">
-            {departments.map((item) => (
-              <NavLink
-                key={item}
-                to={`/products?category=${encodeURIComponent(item)}`}
-                onClick={closeMenus}
-                className="rounded-xl border border-[#e6dfd4] bg-white px-3 py-3"
-              >
-                <span className="block text-sm font-bold">{item}</span>
-              </NavLink>
-            ))}
-          </div>
         </div>
       )}
     </header>
