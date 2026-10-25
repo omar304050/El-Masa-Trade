@@ -16,7 +16,16 @@
 }
 
 .product-slider .slick-slide > div {
-  padding-inline: 8px;
+  padding: 10px 8px 18px;
+  height: 100%;
+}
+
+.home-slider .slick-track {
+  display: flex;
+}
+
+.home-slider .slick-slide {
+  height: auto;
 }
 
 .product-slider .slick-slide img {
@@ -25,7 +34,7 @@
 }
 
 .product-slider .slick-dots {
-  bottom: -2rem;
+  bottom: -1.6rem;
 }
 
 .home-slider .slick-prev {
@@ -73,12 +82,43 @@
   }
 }
 
-.product-slider .slick-dots li button:before {
-  color: #0b2548;
-  opacity: 0.35;
+.home-slider .slick-dots {
+  display: flex !important;
+  justify-content: center;
+  gap: 8px;
 }
 
-.product-slider .slick-dots li.slick-active button:before {
-  color: #0b2548;
+.home-slider .slick-dots li {
+  width: 7px;
+  height: 7px;
+  margin: 0;
+}
+
+.home-slider .slick-dots li button {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+}
+
+.home-slider .slick-dots li button:before {
+  content: "";
+  inset: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #d4a84a;
+  opacity: 0.4;
+  font-size: 0;
+  line-height: 0;
+}
+
+.home-slider .slick-dots li.slick-active,
+.home-slider .slick-dots li.slick-active button,
+.home-slider .slick-dots li.slick-active button:before {
+  width: 26px;
+}
+
+.home-slider .slick-dots li.slick-active button:before {
+  background: #f0d7a4;
   opacity: 1;
 }

@@ -21,13 +21,14 @@ export const addToCart = async (productId , cartId , quantity) => {
   return response.data;
 };
 
-export const removeFromCart = async (productId) => {
-  const response = await axiosInstance.delete(`/api/cart/${productId}`);
+export const removeFromCart = async (cartId , productId) => {
+  const response = await axiosInstance.delete(`/api/cart/${cartId}` ,   { data: { productId },
+  });
   return response.data;
 };
 
-export const clearCart = async () => {
-  const response = await axiosInstance.delete("/api/cart");
+export const clearCart = async (cartId) => {
+  const response = await axiosInstance.delete(`/api/cart/${cartId}/clear`);
   return response.data;
 };
 

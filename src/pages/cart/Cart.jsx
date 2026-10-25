@@ -4,6 +4,7 @@ import { clearCart, loadCart, removeFromCart , getCart , createCart } from "../.
 import Loader from "../../components/loader/loader.jsx";
 import Breadcrumb from "../../components/Breadcrumb/Breadcrumb.jsx";
 import { useEffect } from "react";
+import toast, { Toaster } from "react-hot-toast";
 
 function money(value) {
   return Number(value || 0).toLocaleString("en-EG", { maximumFractionDigits: 1 });
@@ -30,12 +31,12 @@ function Cart() {
 
 
   const removeItem = useMutation({
-    mutationFn: removeFromCart,
+    mutationFn: (productId) => removeFromCart(cartId , productId).then(() => toast.success("تم حذف المنتج بنجاح")).catch(() => toast.error("حصل خطأ أثناء حذف المنتج")),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cart"] }),
   });
 
   const emptyCart = useMutation({
-    mutationFn: clearCart,
+    mutationFn: () => clearCart(cartId).then(() => toast.success("تم إفراغ السلة بنجاح")).catch(() => toast.error("حصل خطأ أثناء إفراغ السلة")),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cart"] }),
   });
 
@@ -74,8 +75,15 @@ function Cart() {
             <button
               type="button"
               onClick={() => emptyCart.mutate()}
-              className="text-sm font-bold text-[#98764e]"
+              disabled={emptyCart.isPending}
+              className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-[#eadfd2] bg-[#fbf8f3] px-3.5 py-2 text-sm font-bold text-[#8a6a45] transition hover:border-[#e8c4b4] hover:bg-[#fff1ec] hover:text-[#b4533a] disabled:cursor-not-allowed disabled:opacity-60"
             >
+              <svg viewBox="0 0 24 24" fill="none" className="size-4" aria-hidden="true">
+                <path d="M4 7h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                <path d="M9 7V5.8A1.8 1.8 0 0 1 10.8 4h2.4A1.8 1.8 0 0 1 15 5.8V7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                <path d="M6.6 7 7.4 18.2A2 2 0 0 0 9.4 20h5.2a2 2 0 0 0 2-1.8L17.4 7" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                <path d="M10 11v5M14 11v5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
               إفراغ السلة
             </button>
           )}
@@ -121,8 +129,16 @@ function Cart() {
                         <button
                           type="button"
                           onClick={() => removeItem.mutate(product._id)}
-                          className="text-xs font-bold text-[#837b70]"
+                          disabled={removeItem.isPending}
+                          aria-label="حذف المنتج"
+                          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[#eadfd2] cursor-pointer bg-[#fbf8f3] px-2.5 py-1.5 text-xs font-bold text-[#8a6a45] transition hover:border-[#e8c4b4] hover:bg-[#fff1ec] hover:text-[#b4533a] disabled:cursor-not-allowed disabled:opacity-60"
                         >
+                          <svg viewBox="0 0 24 24" fill="none" className="size-3.5" aria-hidden="true">
+                            <path d="M4 7h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                            <path d="M9 7V5.8A1.8 1.8 0 0 1 10.8 4h2.4A1.8 1.8 0 0 1 15 5.8V7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                            <path d="M6.6 7 7.4 18.2A2 2 0 0 0 9.4 20h5.2a2 2 0 0 0 2-1.8L17.4 7" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                            <path d="M10 11v5M14 11v5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                          </svg>
                           حذف
                         </button>
                       </div>

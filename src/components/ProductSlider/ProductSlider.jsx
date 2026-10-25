@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import SliderExport from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -21,19 +22,19 @@ function SliderArrow({ className, style, onClick, direction }) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        width: 40,
-        height: 40,
+        width: 42,
+        height: 42,
         borderRadius: "999px",
-        background: "#fff",
-        border: "1px solid #e6dfd4",
+        background: "#16130f",
+        border: "1px solid rgba(212,168,74,0.7)",
         zIndex: 3,
-        boxShadow: "0 2px 8px rgba(11, 37, 72, 0.12)",
+        boxShadow: "0 10px 24px rgba(0,0,0,0.35)",
       }}
     >
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
         <path
           d={next ? "M11 4L6 9l5 5" : "M7 4l5 5-5 5"}
-          stroke="#0b2548"
+          stroke="#f0d7a4"
           strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -65,41 +66,67 @@ function ProductSlider() {
   }, []);
 
   return (
-    <section dir="rtl" className="bg-[#f4f7fb] py-10 font-['Cairo'] text-[#0b2548] sm:py-14">
-      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-12">
-        <h2 className="mb-8 text-2xl font-semibold">منتجاتنا</h2>
+    <section dir="rtl" className="relative overflow-hidden bg-[#100e0c] py-14 font-['Cairo'] text-[#f8f1e6] sm:py-20">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(212,168,74,0.18),transparent_58%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-l from-transparent via-[#d4a84a] to-transparent" />
+
+      <div className="relative mx-auto max-w-7xl px-5 sm:px-8 lg:px-12">
+        <div className="mb-8 flex items-end justify-between gap-4 sm:mb-10">
+          <div>
+            <p className="text-xs font-semibold text-[#d4a84a]">مختارات ماسة تريد</p>
+            <h2 className="mt-2 text-3xl font-semibold sm:text-4xl">منتجاتنا</h2>
+          </div>
+          <Link
+            to="/products"
+            className="mb-1 shrink-0 border-b border-[#d4a84a]/70 pb-0.5 text-sm font-semibold text-[#f0d7a4] transition hover:border-[#f0d7a4] hover:text-white"
+          >
+            عرض الكل
+          </Link>
+        </div>
+
         <div className="product-slider home-slider" dir="ltr">
           <Slider
             key={slidesToShow}
             dots={slidesToShow > 1}
             infinite
-            speed={600}
+            speed={700}
             slidesToShow={slidesToShow}
             slidesToScroll={1}
             autoplay
-            autoplaySpeed={2800}
+            autoplaySpeed={3200}
             pauseOnHover
             arrows
             prevArrow={<SliderArrow direction="prev" />}
             nextArrow={<SliderArrow direction="next" />}
           >
-            {products?.data?.map((product) => (
-              <div key={product._id} className="px-6 text-center sm:px-3">
-                <div className="mx-auto flex h-44 items-center justify-center sm:h-72 lg:h-80">
-                  <img
-                    src={Array.isArray(product.images) ? product.images[0] : product.images}
-                    alt={product.name}
-                    className="max-h-full max-w-full object-contain"
-                  />
+            {products?.data?.map((product) => {
+              const image = Array.isArray(product.images) ? product.images[0] : product.images;
+
+              return (
+                <div key={product._id} className="h-full px-2">
+                  <Link
+                    to={`/productdetails/${product._id}`}
+                    className="group flex h-full flex-col overflow-hidden rounded-3xl border border-[#d4a84a]/25 bg-[#171410] shadow-[0_18px_40px_rgba(0,0,0,0.28)] transition duration-300 hover:-translate-y-1 hover:border-[#e7c98a]/70"
+                  >
+                    <div className="flex h-52 items-center justify-center bg-[radial-gradient(circle_at_50%_42%,#fffdf8,#e8d7be_78%)] sm:h-64">
+                      <img
+                        src={image}
+                        alt={product.name}
+                        className="max-h-[76%] max-w-[76%] object-contain transition duration-500 group-hover:scale-105"
+                      />
+                    </div>
+                    <div dir="rtl" className="flex flex-1 flex-col border-t border-[#d4a84a]/20 px-4 py-4 text-center">
+                      <h3 className="line-clamp-2 min-h-12 text-sm font-semibold leading-6 text-[#f8f1e6] sm:text-base">
+                        {product.name}
+                      </h3>
+                      <p className="mt-auto pt-3 text-sm font-bold tracking-wide text-[#f0d7a4]">
+                        {Number(product.price).toLocaleString("ar-EG")} ج.م
+                      </p>
+                    </div>
+                  </Link>
                 </div>
-                <h3 className="mx-auto mt-3 line-clamp-2 min-h-12 max-w-64 text-base font-bold leading-6 sm:mt-4 sm:text-lg">
-                  {product.name}
-                </h3>
-                <p className="mx-auto mt-2 inline-block whitespace-nowrap rounded-md border border-[#8a7460] px-3 py-1 text-sm font-bold text-[#8a7460]">
-                  {Number(product.price).toLocaleString("ar-EG")} ج.م
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </Slider>
         </div>
       </div>
