@@ -4,9 +4,9 @@ import Footer from "../footer/Footer.jsx";
 import ScrollToTop from "../components/ScrollToTop/ScrollToTop.jsx";
 import { ProductProvider } from "../context/ProductContext.jsx";
 import { useQuery } from "@tanstack/react-query";
-import { createCart } from "../services/cart.service";
 import toast, { Toaster } from "react-hot-toast";
 import { CartProvider } from "../context/cartContext.jsx";
+import { createGuestSession , checkGuestSession , createCart} from "../services/cart.service.js";
 
 
 
@@ -14,21 +14,40 @@ const Layout = () => {
 
     const cartId = localStorage.getItem("cartId");
 
-    const { data: id, isLoading, isError, error } = useQuery({
-      queryKey: ["createCart"],
-      queryFn: async () => {
-        if (!cartId) {
-          const created = await createCart();
-          const newCartId = created?.cartId || created?.cart?.cartId;
-    
-          localStorage.setItem("cartId", newCartId);
-    
-          return newCartId;
-        }
-    
+ 
+const { data: id, isLoading, isError, error } = useQuery({
+  queryKey: ["createCart"],
+
+  queryFn: async () => {
+    try {
+      await checkGuestSession();
+
+      const cartId = localStorage.getItem("cartId");
+
+      if (cartId) {
         return cartId;
-      },
-    });
+      }
+    } catch (error) {
+      if (error.response?.status !== 401) {
+        throw error;
+      }
+    }
+
+    await createGuestSession();
+
+    const created = await createCart();
+    const newCartId = created?.cartId || created?.cart?.cartId;
+
+    if (!newCartId) {
+      throw new Error("Failed to create cart");
+    }
+
+    localStorage.setItem("cartId", newCartId);
+
+    return newCartId;
+  },
+});
+
     return (
         <CartProvider>
         <ProductProvider>

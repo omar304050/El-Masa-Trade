@@ -1,5 +1,18 @@
 import axiosInstance from "../config/axios.config";
 
+export const createGuestSession = async () => {
+  const response = await axiosInstance.post("/api/guest-session");
+  return response.data;
+};
+
+
+export const checkGuestSession = async () => {
+  const response = await axiosInstance.get("/api/guest-session");
+  return response.data;
+};
+
+
+
 export const createCart = async () => {
   const response = await axiosInstance.post("/api/cart");
   return response.data;
