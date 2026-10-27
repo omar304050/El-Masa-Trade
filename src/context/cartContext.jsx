@@ -9,14 +9,21 @@ const CartContext = createContext();
 export const CartProvider = ({ children }) => {
     const cartId = localStorage.getItem("cartId");
 
-    const { data: cartData } = useQuery({
+    const { data: cartData , isLoading, isError, error } = useQuery({
         queryKey: ["cart"],
         queryFn: () => getCart(cartId),
         enabled: !!cartId,
+        staleTime: 1000 * 60 * 5,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
+        refetchInterval: false,
+        refetchIntervalInBackground: false,
+        refetchIntervalInBackground: false,
     });
 
     return (
-        <CartContext.Provider value={{ cartData }}>
+        <CartContext.Provider value={{ cartData , isLoading, isError, error }}>
             {children}
         </CartContext.Provider>
     );

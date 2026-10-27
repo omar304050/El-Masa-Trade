@@ -1,13 +1,22 @@
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { clearCart, loadCart, removeFromCart , getCart , createCart } from "../../services/cart.service";
+import {
+  clearCart,
+  loadCart,
+  removeFromCart,
+  getCart,
+  createCart,
+} from "../../services/cart.service";
 import Loader from "../../components/loader/loader.jsx";
 import Breadcrumb from "../../components/Breadcrumb/Breadcrumb.jsx";
 import { useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
+import { useCart } from "../../context/cartContext.jsx";
 
 function money(value) {
-  return Number(value || 0).toLocaleString("en-EG", { maximumFractionDigits: 1 });
+  return Number(value || 0).toLocaleString("en-EG", {
+    maximumFractionDigits: 1,
+  });
 }
 
 function salePrice(product) {
@@ -19,43 +28,52 @@ function salePrice(product) {
 
 function Cart() {
   const queryClient = useQueryClient();
-  const cartId = localStorage.getItem("cartId");
-  console.log("cartId:", cartId);
 
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["cart"],
-    queryFn: () => getCart(cartId),
-    enabled: !!cartId 
-  });
+  const { cartData, isLoading, isError, error } = useCart();
 
-
-
+  const cartId = cartData?.cartId || cartData?._id;
   const removeItem = useMutation({
-    mutationFn: (productId) => removeFromCart(cartId , productId).then(() => toast.success("تم حذف المنتج بنجاح")).catch(() => toast.error("حصل خطأ أثناء حذف المنتج")),
+    mutationFn: (productId) =>
+      removeFromCart(cartId, productId)
+        .then(() => toast.success("تم حذف المنتج بنجاح"))
+        .catch(() => toast.error("حصل خطأ أثناء حذف المنتج")),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cart"] }),
   });
 
   const emptyCart = useMutation({
-    mutationFn: () => clearCart(cartId).then(() => toast.success("تم إفراغ السلة بنجاح")).catch(() => toast.error("حصل خطأ أثناء إفراغ السلة")),
+    mutationFn: () =>
+      clearCart(cartId)
+        .then(() => toast.success("تم إفراغ السلة بنجاح"))
+        .catch(() => toast.error("حصل خطأ أثناء إفراغ السلة")),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cart"] }),
   });
 
   if (isLoading) return <Loader />;
 
   if (isError) {
-    return <p className="p-10 text-center font-['Cairo']">حصل خطأ: {error.message}</p>;
+    return (
+      <p className="p-10 text-center font-['Cairo']">
+        حصل خطأ: {error.message}
+      </p>
+    );
   }
 
-  const cart = data?.cart || data || {};
+  const cart = cartData?.cart || data || {};
   const items = cart.items || cart.data || [];
-  const count = items.reduce((sum, item) => sum + (Number(item.quantity) || 1), 0);
+  const count = items.reduce(
+    (sum, item) => sum + (Number(item.quantity) || 1),
+    0,
+  );
   const total = items.reduce((sum, item) => {
     const product = item.product || item;
     return sum + salePrice(product) * (Number(item.quantity) || 1);
   }, 0);
 
   return (
-    <section dir="rtl" className="min-h-[calc(100svh-8.5rem)] font-['Cairo'] text-[#1c1915]">
+    <section
+      dir="rtl"
+      className="min-h-[calc(100svh-8.5rem)] font-['Cairo'] text-[#1c1915]"
+    >
       <div className="mx-auto max-w-6xl px-5 py-6 sm:px-8">
         <Breadcrumb
           items={[
@@ -63,8 +81,7 @@ function Cart() {
             { label: "المنتجات", to: "/products" },
             { label: "السلة" },
           ]}
-
-        />  
+        />
 
         <div className="mt-5 flex items-end justify-between gap-4">
           <div>
@@ -78,11 +95,36 @@ function Cart() {
               disabled={emptyCart.isPending}
               className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-[#eadfd2] bg-[#fbf8f3] px-3.5 py-2 text-sm font-bold text-[#8a6a45] transition hover:border-[#e8c4b4] hover:bg-[#fff1ec] hover:text-[#b4533a] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <svg viewBox="0 0 24 24" fill="none" className="size-4" aria-hidden="true">
-                <path d="M4 7h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                <path d="M9 7V5.8A1.8 1.8 0 0 1 10.8 4h2.4A1.8 1.8 0 0 1 15 5.8V7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                <path d="M6.6 7 7.4 18.2A2 2 0 0 0 9.4 20h5.2a2 2 0 0 0 2-1.8L17.4 7" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-                <path d="M10 11v5M14 11v5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                className="size-4"
+                aria-hidden="true"
+              >
+                <path
+                  d="M4 7h16"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M9 7V5.8A1.8 1.8 0 0 1 10.8 4h2.4A1.8 1.8 0 0 1 15 5.8V7"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M6.6 7 7.4 18.2A2 2 0 0 0 9.4 20h5.2a2 2 0 0 0 2-1.8L17.4 7"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M10 11v5M14 11v5"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
               </svg>
               إفراغ السلة
             </button>
@@ -92,7 +134,9 @@ function Cart() {
         {items.length === 0 ? (
           <div className="mt-8 rounded-2xl border border-[#e8e2d8] bg-white px-6 py-16 text-center">
             <p className="text-lg font-bold text-[#252d35]">السلة فارغة</p>
-            <p className="mt-2 text-sm text-[#837b70]">أضف منتجات عشان تقدر تكمل الطلب.</p>
+            <p className="mt-2 text-sm text-[#837b70]">
+              أضف منتجات عشان تقدر تكمل الطلب.
+            </p>
             <Link
               to="/products"
               className="mt-6 inline-flex h-11 items-center rounded-xl bg-[#273746] px-6 text-sm font-bold text-white"
@@ -105,7 +149,9 @@ function Cart() {
             <div className="space-y-3">
               {items.map((item) => {
                 const product = item.product || item;
-                const image = Array.isArray(product.images) ? product.images[0] : product.images;
+                const image = Array.isArray(product.images)
+                  ? product.images[0]
+                  : product.images;
                 const quantity = Number(item.quantity) || 1;
                 const price = salePrice(product);
 
@@ -118,12 +164,19 @@ function Cart() {
                       to={`/productdetails/${product._id}`}
                       className="flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#f7f5f1] p-2"
                     >
-                      <img src={image} alt={product.name} className="max-h-full max-w-full object-contain" />
+                      <img
+                        src={image}
+                        alt={product.name}
+                        className="max-h-full max-w-full object-contain"
+                      />
                     </Link>
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-3">
-                        <Link to={`/productdetails/${product._id}`} className="font-bold text-[#252d35]">
+                        <Link
+                          to={`/productdetails/${product._id}`}
+                          className="font-bold text-[#252d35]"
+                        >
                           {product.name}
                         </Link>
                         <button
@@ -133,21 +186,50 @@ function Cart() {
                           aria-label="حذف المنتج"
                           className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[#eadfd2] cursor-pointer bg-[#fbf8f3] px-2.5 py-1.5 text-xs font-bold text-[#8a6a45] transition hover:border-[#e8c4b4] hover:bg-[#fff1ec] hover:text-[#b4533a] disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                          <svg viewBox="0 0 24 24" fill="none" className="size-3.5" aria-hidden="true">
-                            <path d="M4 7h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                            <path d="M9 7V5.8A1.8 1.8 0 0 1 10.8 4h2.4A1.8 1.8 0 0 1 15 5.8V7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                            <path d="M6.6 7 7.4 18.2A2 2 0 0 0 9.4 20h5.2a2 2 0 0 0 2-1.8L17.4 7" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-                            <path d="M10 11v5M14 11v5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            className="size-3.5"
+                            aria-hidden="true"
+                          >
+                            <path
+                              d="M4 7h16"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                            />
+                            <path
+                              d="M9 7V5.8A1.8 1.8 0 0 1 10.8 4h2.4A1.8 1.8 0 0 1 15 5.8V7"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                            />
+                            <path
+                              d="M6.6 7 7.4 18.2A2 2 0 0 0 9.4 20h5.2a2 2 0 0 0 2-1.8L17.4 7"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M10 11v5M14 11v5"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                            />
                           </svg>
                           حذف
                         </button>
                       </div>
-                      <p className="mt-1 line-clamp-1 text-sm text-[#837b70]">{product.description}</p>
+                      <p className="mt-1 line-clamp-1 text-sm text-[#837b70]">
+                        {product.description}
+                      </p>
                       <div className="mt-3 flex items-center justify-between gap-3">
                         <span className="rounded-lg bg-[#f7f5f1] px-3 py-1 text-sm font-bold text-[#273746]">
                           الكمية: {quantity}
                         </span>
-                        <span className="font-extrabold text-[#98764e]">{money(price * quantity)} ج.م</span>
+                        <span className="font-extrabold text-[#98764e]">
+                          {money(price * quantity)} ج.م
+                        </span>
                       </div>
                     </div>
                   </article>
@@ -169,7 +251,9 @@ function Cart() {
               </div>
               <div className="mt-4 flex items-center justify-between">
                 <span className="font-bold text-[#252d35]">الإجمالي</span>
-                <span className="text-2xl font-extrabold text-[#98764e]">{money(total)} ج.م</span>
+                <span className="text-2xl font-extrabold text-[#98764e]">
+                  {money(total)} ج.م
+                </span>
               </div>
               <Link
                 to="/checkout"
@@ -177,7 +261,10 @@ function Cart() {
               >
                 إتمام الطلب
               </Link>
-              <Link to="/products" className="mt-3 block text-center text-sm font-bold text-[#98764e]">
+              <Link
+                to="/products"
+                className="mt-3 block text-center text-sm font-bold text-[#98764e]"
+              >
                 متابعة التسوق
               </Link>
             </aside>
