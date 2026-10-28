@@ -26,7 +26,7 @@ function Orders() {
     queryFn: getOrders,
   });
 
-  console.log(data);
+  console.log({ isLoading, isError, data });
   if (isLoading) {
     return <p className="p-8 text-center">جاري تحميل الطلبات...</p>;
   }
