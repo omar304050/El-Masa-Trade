@@ -90,12 +90,12 @@ function Navbar() {
 
           <div className="ms-auto flex items-center gap-2">
             <NavLink
-              to="/login"
+              to="/allorders"
               onClick={closeMenus}
               className="hidden items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-[#3d362d] transition hover:bg-[#efe8dc] sm:flex"
             >
               <UserIcon />
-              حسابي
+              طلباتي
             </NavLink>
             <NavLink
               to="/cart"
