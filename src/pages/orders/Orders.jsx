@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getOrders } from "../../services/orders.service.js";
+import { getOrders } from "../../services/order.service.js";
 
 const statuses = {
   pending: { label: "طلب جديد", color: "bg-amber-100 text-amber-800" },
@@ -18,7 +18,7 @@ function Orders() {
   const [openId, setOpenId] = useState(null);
 
   const {
-    data: orders = [],
+    data,
     isLoading,
     isError,
   } = useQuery({
@@ -26,6 +26,7 @@ function Orders() {
     queryFn: getOrders,
   });
 
+  console.log(data);
   if (isLoading) {
     return <p className="p-8 text-center">جاري تحميل الطلبات...</p>;
   }
@@ -38,18 +39,21 @@ function Orders() {
     <section dir="rtl" className="mx-auto max-w-5xl p-5 font-['Cairo']">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold">طلباتي</h1>
-        <Link to="/products" className="text-sm text-blue-700">
+        <Link
+          to="/products"
+          className="inline-flex h-10 items-center rounded-xl bg-[#273746] px-4 text-sm font-bold text-white transition hover:bg-[#98764e]"
+        >
           تصفح المنتجات
         </Link>
       </div>
 
-      {orders.length === 0 ? (
+      {data?.data?.length === 0 ? (
         <p className="rounded-xl bg-gray-50 p-8 text-center">
           لا توجد طلبات حتى الآن.
         </p>
       ) : (
         <div className="space-y-4">
-          {orders.map((order) => {
+          {data?.data?.map((order) => {
             const status = statuses[order.status] || statuses.pending;
             const isOpen = openId === order._id;
 
@@ -88,7 +92,21 @@ function Orders() {
                       {status.label}
                     </span>
 
-                    <span>{isOpen ? "−" : "+"}</span>
+                    <span
+                      className={`grid size-8 shrink-0 place-items-center rounded-full border transition ${
+                        isOpen
+                          ? "border-[#d4a84a] bg-[#f6efe4] text-[#9a6b2f]"
+                          : "border-[#e6dfd4] bg-[#fbf8f3] text-[#8a7460]"
+                      }`}
+                      aria-hidden="true"
+                    >
+                      <svg viewBox="0 0 20 20" className="size-4" fill="none">
+                        <path d="M4.5 10h11" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+                        {!isOpen && (
+                          <path d="M10 4.5v11" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+                        )}
+                      </svg>
+                    </span>
                   </div>
                 </button>
 
