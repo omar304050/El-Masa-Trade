@@ -11,3 +11,13 @@ export const getProductById = async (id) => {
 
   return response.data;
 };
+
+export const updateProduct = async (id, product) => {
+  const response = await axiosInstance.put(`/api/products/${id}`, product);
+  return response.data;
+};
+
+export const deleteProduct = async (id) => {
+  const response = await axiosInstance.delete(`/api/products/${id}`);
+  return response.data;
+};

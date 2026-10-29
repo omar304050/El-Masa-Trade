@@ -13,6 +13,10 @@ import Categories from "./pages/categories/Categories.jsx";
 import ProductDetails from "./pages/productDetails/ProductDetails.jsx";
 import CheckOut from "./pages/checkOut/CheckOut.jsx";
 import Orders from "./pages/orders/Orders.jsx";
+import AdminLayout from "./admin/AdminLayout.jsx";
+import AdminLogin from "./pages/admin/AdminLogin.jsx";
+import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
+import AdminProducts from "./pages/admin/AdminProducts.jsx";
 
 
 const router = createBrowserRouter([
@@ -50,7 +54,20 @@ const router = createBrowserRouter([
             { path: 'checkout', element: <CheckOut /> },
             { path: 'allorders', element: <Orders /> },
         ]
-    }
+    },
+
+    {
+        path: "admin/login",
+        element: <AdminLogin />,
+    },
+    {
+        path: "admin",
+        element: <AdminLayout />,
+        children: [
+            { index: true, element: <AdminDashboard /> },
+            { path: "products", element: <AdminProducts /> },
+        ],
+    },
 ]);
 
 
