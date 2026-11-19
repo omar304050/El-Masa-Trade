@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "https://el-masa-backend.vercel.app",
+        target: "http://localhost:3000",
         changeOrigin: true,
       },
     },

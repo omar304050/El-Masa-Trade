@@ -1,10 +1,5 @@
-import { createBrowserRouter } from "react-router-dom";
-import GuestLayout from "./GuestLayout/GuestLayout.jsx";
+import { createBrowserRouter , Navigate } from "react-router-dom";
 import Layout from "./layOut/layout.jsx";
-import Login from "./pages/login/Login.jsx";
-import Register from "./pages/register/Register.jsx";
-import ForgotPassword from "./pages/forgetPassword/ForgetPassword.jsx";
-import UpdatePassword from "./pages/updatePassword/UpdatePassword.jsx";
 import Home from "./pages/home/Home.jsx";
 import Products from "./pages/products/Products.jsx";
 import Cart from "./pages/cart/Cart.jsx";
@@ -17,31 +12,12 @@ import AdminLayout from "./admin/AdminLayout.jsx";
 import AdminLogin from "./pages/admin/AdminLogin.jsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
 import AdminProducts from "./pages/admin/AdminProducts.jsx";
+import AdminAddProduct from "./pages/admin/AdminAddProduct.jsx";
+import AdminGuard from "./pages/admin/AdminGuard.jsx";
+
 
 
 const router = createBrowserRouter([
-    {
-    element: <GuestLayout/>
-    ,children: [
-        {
-            path: "login",
-            element: <Login/>
-        },
-        {
-            path: "register",
-            element: <Register/>
-        },
-        {
-            path: "forgot-password",
-            element: <ForgotPassword/>
-        },
-        {
-            path: "Update-Password",
-            element: <UpdatePassword/>
-        },
-    ]
-    },
-
     {
         element: <Layout/>,
         children: [
@@ -61,11 +37,18 @@ const router = createBrowserRouter([
         element: <AdminLogin />,
     },
     {
-        path: "admin",
-        element: <AdminLayout />,
+        path: "/admin",
+        element: <AdminGuard />,
         children: [
-            { index: true, element: <AdminDashboard /> },
-            { path: "products", element: <AdminProducts /> },
+            {
+                element: <AdminLayout />,
+                children: [
+                    { path: "admin-dashboard", element: <AdminDashboard /> },
+                    { path: "admin-products", element: <AdminProducts /> },
+                    { path: "admin-add-product", element: <AdminAddProduct /> },
+                    { index: true, element: <Navigate to="/admin/admin-dashboard" replace /> },
+                ],
+            },
         ],
     },
 ]);

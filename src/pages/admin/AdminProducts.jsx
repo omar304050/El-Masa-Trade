@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { deleteProduct, getProducts, updateProduct } from "../../services/products.service.js";
 import Loader from "../../components/loader/loader.jsx";
+import Dialog from "../../components/Dialog/Dialog.jsx";
+import {useSidebarCollapse} from "../../context/sidebarCollapseContext.jsx"
 
 function money(value) {
   return Number(value || 0).toLocaleString("ar-EG");
@@ -25,10 +27,13 @@ function AdminProducts() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(null);
   const [formError, setFormError] = useState("");
+  const [deleting, setDeleting] = useState(null);
+  const { isCollapsed, setIsCollapsed } = useSidebarCollapse
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["products"],
     queryFn: getProducts,
+    staleTime: 5 * 60 * 1000,
   });
 
   const products = Array.isArray(data?.data) ? data.data : null;
@@ -51,6 +56,7 @@ function AdminProducts() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["adminDashboard"] });
+      setDeleting(null);
     },
   });
 
@@ -131,16 +137,20 @@ function AdminProducts() {
     });
   }
 
-  function onDelete(product) {
-    const confirmed = window.confirm(`حذف «${product.name}»؟`);
-    if (!confirmed) return;
-    deleteMutation.mutate(product._id);
+  function closeDelete() {
+    if (deleteMutation.isPending) return;
+    setDeleting(null);
+  }
+
+  function confirmDelete() {
+    if (!deleting?._id) return;
+    deleteMutation.mutate(deleting._id);
   }
 
   if (isLoading) return <Loader />;
 
   return (
-    <section className="rounded-2xl border border-[#d5dbe3] bg-white p-6">
+    <section className="rounded-2xl border border-[#d5dbe3] bg-white p-6 ">
       <h2 className="text-2xl font-bold">إدارة المنتجات</h2>
       <p className="mt-2 max-w-2xl text-sm leading-7 text-[#5c5348]">
         عدّل بيانات المنتج من النافذة، أو احذفه من الجدول.
@@ -192,7 +202,7 @@ function AdminProducts() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => onDelete(product)}
+                    onClick={() => setDeleting(product)}
                     disabled={deleteMutation.isPending}
                     className="h-9 rounded-lg px-3 text-xs font-bold text-[#8a4b3c] transition hover:bg-[#f8efe9] disabled:opacity-50"
                   >
@@ -204,6 +214,33 @@ function AdminProducts() {
           </ul>
         )}
       </div>
+
+      <Dialog open={Boolean(deleting)} onClose={closeDelete}>
+        <div className="w-[min(92vw,26rem)] rounded-3xl border border-[#e6dfd4] bg-white p-6">
+          <h3 className="text-xl font-bold text-[#1c1915]">حذف المنتج</h3>
+          <p className="mt-2 text-sm leading-7 text-[#6d6256]">
+            متأكد إنك عايز تحذف «{deleting?.name}»؟ العملية دي مش هترجع.
+          </p>
+          <div className="mt-5 flex gap-3">
+            <button
+              type="button"
+              onClick={confirmDelete}
+              disabled={deleteMutation.isPending}
+              className="h-11 flex-1 rounded-xl bg-[#8a4b3c] text-sm font-bold text-white transition hover:bg-[#6f3c31] disabled:opacity-50"
+            >
+              {deleteMutation.isPending ? "جاري الحذف" : "نعم"}
+            </button>
+            <button
+              type="button"
+              onClick={closeDelete}
+              disabled={deleteMutation.isPending}
+              className="h-11 flex-1 rounded-xl border border-[#e6dfd4] text-sm font-bold text-[#273746] disabled:opacity-50"
+            >
+              لا
+            </button>
+          </div>
+        </div>
+      </Dialog>
 
       {editing && form && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-[#1c1915]/40 p-4" onClick={closeEdit}>

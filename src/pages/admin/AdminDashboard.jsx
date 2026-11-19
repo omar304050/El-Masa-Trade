@@ -51,7 +51,7 @@ function AdminDashboard() {
       </div>
 
       <Link
-        to="/admin/products"
+        to="/admin/admin-products"
         className="mt-6 inline-flex h-11 items-center rounded-xl bg-[#273746] px-5 text-sm font-bold text-white transition hover:bg-[#98764e]"
       >
         إدارة المنتجات

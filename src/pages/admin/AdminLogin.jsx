@@ -1,10 +1,31 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AdminDesktopOnly from "../../admin/AdminDesktopOnly.jsx";
+import { useState } from "react";
+import { adminLogin } from "../../services/admin.service.js";
 
 function AdminLogin() {
-  function onSubmit(event) {
-    event.preventDefault();
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+ 
+  const HndleChange = (event) => {
+    if (event.target.name === "email") {
+      setEmail(event.target.value);
+    } else if (event.target.name === "password") {
+      setPassword(event.target.value);
+    }
+
   }
+
+const hamdleSubmit = async (event) => {
+  event.preventDefault();
+  const response = await adminLogin(email, password);
+  if (response.success) {
+    navigate("/admin/admin-dashboard");
+  } else {
+    toast.error(response.message);
+  }
+}
 
   return (
     <AdminDesktopOnly>
@@ -14,12 +35,14 @@ function AdminLogin() {
         <h1 className="mt-2 text-2xl font-bold">دخول الإدارة</h1>
         <p className="mt-2 text-sm leading-6 text-[#5c5348]">هذه الصفحة خاصة بفريق المتجر، ومنفصلة عن حسابات العملاء.</p>
 
-        <form onSubmit={onSubmit} className="mt-6 space-y-4">
+        <form onSubmit={hamdleSubmit} className="mt-6 space-y-4">
           <label className="block text-sm font-bold">
             البريد الإلكتروني
             <input
               type="email"
               name="email"
+              value={email}
+              onChange={HndleChange}
               autoComplete="username"
               className="mt-2 h-12 w-full rounded-xl border border-[#e6dfd4] bg-[#fbf8f3] px-4 text-sm outline-none focus:border-[#d4893a]"
             />
@@ -29,6 +52,8 @@ function AdminLogin() {
             <input
               type="password"
               name="password"
+              value={password}
+              onChange={HndleChange}
               autoComplete="current-password"
               className="mt-2 h-12 w-full rounded-xl border border-[#e6dfd4] bg-[#fbf8f3] px-4 text-sm outline-none focus:border-[#d4893a]"
             />

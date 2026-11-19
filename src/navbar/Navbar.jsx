@@ -216,13 +216,6 @@ function Navbar() {
                 {link.label}
               </NavLink>
             ))}
-            <NavLink
-              to="/login"
-              onClick={closeMenus}
-              className="rounded-xl px-3 py-3 text-sm font-bold text-[#1c1915] sm:hidden"
-            >
-              حسابي
-            </NavLink>
           </div>
         </div>
       )}

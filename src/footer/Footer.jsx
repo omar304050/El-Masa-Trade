@@ -9,7 +9,6 @@ const shopLinks = [
 ];
 
 const accountLinks = [
-  { to: "/login", label: "حسابي" },
   { to: "/cart", label: "السلة" },
   { to: "/checkout", label: "إتمام الطلب" },
   { to: "/allorders", label: "طلباتي" },
