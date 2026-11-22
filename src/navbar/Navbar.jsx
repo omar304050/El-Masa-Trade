@@ -244,20 +244,21 @@ function Navbar() {
       {menuOpen && (
         <div className="border-b border-[#e6dfd4] bg-[#fbf8f3] px-4 py-4 md:hidden">
 
-          <form onSubmit={onSearch}>
-            <label className="block">
+       <form onSubmit={onSearch} className="flex gap-2">
+  <input
+    value={query}
+    onChange={(e) => setQuery(e.target.value)}
+    placeholder="ابحث بالموديل أو اسم الجهاز"
+    className="h-11 min-w-0 flex-1 rounded-full border border-[#e2d9cc] bg-white px-4 text-sm outline-none focus:border-[#d4893a]"
+  />
 
-              <span className="sr-only">ابحث في المنتجات</span>
-
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="ابحث بالموديل أو اسم الجهاز"
-                className="h-11 w-full rounded-full border border-[#e2d9cc] bg-white px-4 text-sm outline-none focus:border-[#d4893a]"
-              />
-
-            </label>
-          </form>
+  <button
+    type="submit"
+    className="rounded-full bg-[#1c1915] px-5 text-sm font-semibold text-[#f6d7a8]"
+  >
+    بحث
+  </button>
+</form>
 
           <div className="mt-4 grid gap-1">
 
