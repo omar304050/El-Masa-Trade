@@ -20,6 +20,11 @@ const links = [
     label: "إضافة منتج",
     icon: "M10 4.5v11M4.5 10h11",
   },
+  {
+    to: "/admin/admin-Orders",
+    label: "كل الطلبات",
+    icon: "M8 6h12M8 12h12M8 18h12M3 6h.01M3 12h.01M3 18h.01",
+  }
 ];
 
 function AdminSidebar() {

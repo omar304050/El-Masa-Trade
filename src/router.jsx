@@ -14,6 +14,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
 import AdminProducts from "./pages/admin/AdminProducts.jsx";
 import AdminAddProduct from "./pages/admin/AdminAddProduct.jsx";
 import AdminGuard from "./pages/admin/AdminGuard.jsx";
+import AdminOrders from "./pages/admin/AdminOrders.jsx"
 
 
 
@@ -46,6 +47,7 @@ const router = createBrowserRouter([
                     { path: "admin-dashboard", element: <AdminDashboard /> },
                     { path: "admin-products", element: <AdminProducts /> },
                     { path: "admin-add-product", element: <AdminAddProduct /> },
+                    { path: "admin-orders", element: <AdminOrders /> },
                     { index: true, element: <Navigate to="/admin/admin-dashboard" replace /> },
                 ],
             },

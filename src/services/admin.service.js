@@ -4,6 +4,10 @@ export const getAdminDashboard = async () => {
     const response = await axiosInstance.get("/api/admin/dashboard");
     return response.data;
 }   
+export const getAllOrders = async () => {
+    const response = await axiosInstance.get("/api/admin/getAllOrders");
+    return response.data;
+}   
 
  export const adminLogin = async (email, password) => {
     const response = await axiosInstance.post("/api/admin/login", { email, password });

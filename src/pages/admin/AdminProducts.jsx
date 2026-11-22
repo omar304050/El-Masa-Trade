@@ -1,369 +1,388 @@
-import { useEffect, useState } from "react";
+
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { deleteProduct, getProducts, updateProduct } from "../../services/products.service.js";
+import {
+  deleteProduct,
+  getProducts,
+  updateProduct,
+} from "../../services/products.service.js";
+
 import Loader from "../../components/loader/loader.jsx";
 import Dialog from "../../components/Dialog/Dialog.jsx";
-import {useSidebarCollapse} from "../../context/sidebarCollapseContext.jsx"
 
 function money(value) {
   return Number(value || 0).toLocaleString("ar-EG");
 }
 
-function formFromProduct(product) {
-  return {
-    name: product.name ?? "",
-    description: product.description ?? "",
-    price: product.price ?? "",
-    stock: product.stock ?? "",
-    category: product.category ?? "",
-    isActive: Boolean(product.isActive),
-    discountIsActive: Boolean(product.discount?.isActive),
-    discountPercentage: product.discount?.percentage ?? 0,
-  };
-}
-
 function AdminProducts() {
   const queryClient = useQueryClient();
-  const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState(null);
-  const [formError, setFormError] = useState("");
-  const [deleting, setDeleting] = useState(null);
-  const { isCollapsed, setIsCollapsed } = useSidebarCollapse
 
+  const [editing, setEditing] = useState(null);
+  const [deleting, setDeleting] = useState(null);
+
+  const [form, setForm] = useState(null);
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
+  const [error, setError] = useState("");
+
+  // جلب المنتجات
   const { data, isLoading, isError } = useQuery({
     queryKey: ["products"],
     queryFn: getProducts,
-    staleTime: 5 * 60 * 1000,
   });
 
-  const products = Array.isArray(data?.data) ? data.data : null;
+  const products = data?.data || [];
 
+  // تحديث المنتج
   const updateMutation = useMutation({
     mutationFn: ({ id, body }) => updateProduct(id, body),
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["adminDashboard"] });
-      setEditing(null);
-      setForm(null);
+
+      closeEdit();
     },
+
     onError: (error) => {
-      setFormError(error?.response?.data?.message || "حصل خطأ أثناء تحديث المنتج.");
+      setError(
+        error.response?.data?.message || "حصل خطأ أثناء تحديث المنتج"
+      );
     },
   });
 
+  // حذف المنتج
   const deleteMutation = useMutation({
     mutationFn: deleteProduct,
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["adminDashboard"] });
+
       setDeleting(null);
     },
   });
 
+  // فتح نافذة التعديل
   function openEdit(product) {
-    setFormError("");
     setEditing(product);
-    setForm(formFromProduct(product));
+    setError("");
+    setImage(null);
+    setImagePreview(product.images?.[0] || "");
+
+    setForm({
+      name: product.name || "",
+      description: product.description || "",
+      price: product.price || "",
+      stock: product.stock || "",
+      category: product.category || "",
+      isActive: product.isActive,
+      discountIsActive: product.discount?.isActive || false,
+      discountPercentage: product.discount?.percentage || 0,
+    });
   }
 
+  // إغلاق نافذة التعديل
   function closeEdit() {
-    if (updateMutation.isPending) return;
+    {updateMutation.isPending ? <Loader /> : "حفظ التعديل"}
+
     setEditing(null);
     setForm(null);
-    setFormError("");
+    setImage(null);
+    setImagePreview("");
+    setError("");
   }
 
-  useEffect(() => {
-    if (!editing) return undefined;
-
-    function onKeyDown(event) {
-      if (event.key === "Escape") closeEdit();
-    }
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [editing, updateMutation.isPending]);
-
-  function onField(event) {
+  // تغيير بيانات الحقول
+  function handleChange(event) {
     const { name, value, type, checked } = event.target;
-    setForm((current) => ({
-      ...current,
+
+    setForm({
+      ...form,
       [name]: type === "checkbox" ? checked : value,
-    }));
+    });
   }
 
-  function onUpdate(event) {
-    event.preventDefault();
-    setFormError("");
+  // اختيار صورة جديدة
+  function handleImageChange(event) {
+    const file = event.target.files[0];
 
-    const price = Number(form.price);
-    const stock = Number(form.stock);
-    const discountPercentage = Number(form.discountPercentage);
+    if (!file) return;
+
+    setImage(file);
+    setImagePreview(URL.createObjectURL(file));
+  }
+
+  // حفظ التعديل
+  function handleUpdate(event) {
+    event.preventDefault();
+    setError("");
 
     if (!form.name.trim() || !form.description.trim() || !form.category.trim()) {
-      setFormError("الاسم والوصف والقسم مطلوبين.");
+      setError("الاسم والوصف والقسم مطلوبين");
       return;
     }
 
-    if (!Number.isFinite(price) || price < 0) {
-      setFormError("السعر لازم يكون رقم صحيح غير سالب.");
-      return;
-    }
+    const body = new FormData();
 
-    if (!Number.isInteger(stock) || stock < 0) {
-      setFormError("المخزون لازم يكون رقم صحيح غير سالب.");
-      return;
-    }
+    body.append("name", form.name.trim());
+    body.append("description", form.description.trim());
+    body.append("price", form.price);
+    body.append("stock", form.stock);
+    body.append("category", form.category.trim());
+    body.append("isActive", form.isActive);
 
-    if (!Number.isFinite(discountPercentage) || discountPercentage < 0 || discountPercentage > 100) {
-      setFormError("نسبة الخصم لازم تكون بين 0 و 100.");
-      return;
+    body.append(
+      "discount",
+      JSON.stringify({
+        isActive: form.discountIsActive,
+        percentage: Number(form.discountPercentage),
+      })
+    );
+
+    // الصورة هتتبعت لو اختار صورة جديدة فقط
+    if (image) {
+      body.append("image", image);
     }
 
     updateMutation.mutate({
       id: editing._id,
-      body: {
-        name: form.name.trim(),
-        description: form.description.trim(),
-        price,
-        stock,
-        category: form.category.trim(),
-        isActive: form.isActive,
-        discount: {
-          isActive: form.discountIsActive,
-          percentage: discountPercentage,
-        },
-      },
+      body,
     });
   }
 
-  function closeDelete() {
-    if (deleteMutation.isPending) return;
-    setDeleting(null);
-  }
+  // حذف المنتج
+  function handleDelete() {
+    if (!deleting) return;
 
-  function confirmDelete() {
-    if (!deleting?._id) return;
     deleteMutation.mutate(deleting._id);
   }
 
   if (isLoading) return <Loader />;
 
   return (
-    <section className="rounded-2xl border border-[#d5dbe3] bg-white p-6 ">
+    <section className="rounded-2xl border bg-white p-6">
       <h2 className="text-2xl font-bold">إدارة المنتجات</h2>
-      <p className="mt-2 max-w-2xl text-sm leading-7 text-[#5c5348]">
-        عدّل بيانات المنتج من النافذة، أو احذفه من الجدول.
+
+      <p className="mt-2 text-sm text-gray-500">
+        تقدر تعدّل بيانات المنتجات أو تحذفها.
       </p>
 
-      {deleteMutation.isError && (
-        <p className="mt-4 text-sm text-[#8a4b3c]">
-          {deleteMutation.error?.response?.data?.message || "حصل خطأ أثناء حذف المنتج."}
+      {isError && (
+        <p className="mt-4 text-red-600">
+          حصل خطأ أثناء تحميل المنتجات.
         </p>
       )}
 
-      <div className="mt-6 overflow-hidden rounded-xl border border-[#e6dfd4]">
-        <div className="grid grid-cols-[1.4fr_0.7fr_0.6fr_0.7fr_auto] bg-[#f7f5f1] px-4 py-3 text-xs font-bold text-[#6d6256]">
-          <span>المنتج</span>
-          <span>السعر</span>
-          <span>المخزون</span>
-          <span>الحالة</span>
-          <span>إجراءات</span>
-        </div>
+      {/* قائمة المنتجات */}
+      <div className="mt-6">
+        {products.map((product) => (
+          <div
+            key={product._id}
+            className="flex items-center justify-between border-b py-4"
+          >
+            <div>
+              <h3 className="font-bold">{product.name}</h3>
+              <p className="text-sm text-gray-500">
+                {money(product.price)} ج.م
+              </p>
+            </div>
 
-        {(isError || products === null) && (
-          <p className="px-4 py-10 text-center text-sm text-[#8a4b3c]">حصل خطأ أثناء تحميل المنتجات.</p>
-        )}
-
-        {!isError && products?.length === 0 && (
-          <p className="px-4 py-10 text-center text-sm text-[#6d6256]">لا توجد منتجات.</p>
-        )}
-
-        {!isError && products?.length > 0 && (
-          <ul>
-            {products.map((product) => (
-              <li
-                key={product._id}
-                className="grid grid-cols-[1.4fr_0.7fr_0.6fr_0.7fr_auto] items-center border-t border-[#e6dfd4] px-4 py-3 text-sm"
+            <div className="flex gap-2">
+              <button
+                onClick={() => openEdit(product)}
+                className="rounded-lg border px-4 py-2 text-sm"
               >
-                <span className="font-bold text-[#1c1915]">{product.name}</span>
-                <span>{money(product.price)} ج.م</span>
-                <span>{product.stock ?? "—"}</span>
-                <span className={product.isActive ? "font-bold text-[#2f6b45]" : "font-bold text-[#8a4b3c]"}>
-                  {product.isActive ? "نشط" : "غير نشط"}
-                </span>
-                <span className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => openEdit(product)}
-                    className="h-9 rounded-lg border border-[#e6dfd4] px-3 text-xs font-bold text-[#273746] transition hover:border-[#98764e]"
-                  >
-                    تعديل
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setDeleting(product)}
-                    disabled={deleteMutation.isPending}
-                    className="h-9 rounded-lg px-3 text-xs font-bold text-[#8a4b3c] transition hover:bg-[#f8efe9] disabled:opacity-50"
-                  >
-                    حذف
-                  </button>
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
+                تعديل
+              </button>
+
+              <button
+                onClick={() => setDeleting(product)}
+                className="rounded-lg px-4 py-2 text-sm text-red-600"
+              >
+                حذف
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
 
-      <Dialog open={Boolean(deleting)} onClose={closeDelete}>
-        <div className="w-[min(92vw,26rem)] rounded-3xl border border-[#e6dfd4] bg-white p-6">
-          <h3 className="text-xl font-bold text-[#1c1915]">حذف المنتج</h3>
-          <p className="mt-2 text-sm leading-7 text-[#6d6256]">
-            متأكد إنك عايز تحذف «{deleting?.name}»؟ العملية دي مش هترجع.
+      {/* نافذة حذف المنتج */}
+      <Dialog
+        open={Boolean(deleting)}
+        onClose={() => setDeleting(null)}
+      >
+        <div className="w-[min(92vw,26rem)] rounded-2xl bg-white p-6">
+          <h3 className="text-xl font-bold">حذف المنتج</h3>
+
+          <p className="my-4">
+            متأكد إنك عايز تحذف {deleting?.name}؟
           </p>
-          <div className="mt-5 flex gap-3">
+
+          <div className="flex gap-3">
             <button
-              type="button"
-              onClick={confirmDelete}
+              onClick={handleDelete}
               disabled={deleteMutation.isPending}
-              className="h-11 flex-1 rounded-xl bg-[#8a4b3c] text-sm font-bold text-white transition hover:bg-[#6f3c31] disabled:opacity-50"
+              className="flex-1 rounded-lg bg-red-600 p-3 text-white"
             >
-              {deleteMutation.isPending ? "جاري الحذف" : "نعم"}
+              {deleteMutation.isPending ? <Loader /> : "نعم، احذف"}
             </button>
+
             <button
-              type="button"
-              onClick={closeDelete}
-              disabled={deleteMutation.isPending}
-              className="h-11 flex-1 rounded-xl border border-[#e6dfd4] text-sm font-bold text-[#273746] disabled:opacity-50"
+              onClick={() => setDeleting(null)}
+              className="flex-1 rounded-lg border p-3"
             >
-              لا
+              إلغاء
             </button>
           </div>
         </div>
       </Dialog>
 
+      {/* نافذة تعديل المنتج */}
       {editing && form && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-[#1c1915]/40 p-4" onClick={closeEdit}>
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="edit-product-title"
-            className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-[#e6dfd4] bg-white p-6"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <h3 id="edit-product-title" className="text-xl font-bold text-[#1c1915]">
-              تعديل المنتج
-            </h3>
-            <p className="mt-1 text-sm text-[#6d6256]">{editing.name}</p>
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
+          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6">
+            <h3 className="text-xl font-bold">تعديل المنتج</h3>
 
-            <form onSubmit={onUpdate} className="mt-5 space-y-4">
+            <form onSubmit={handleUpdate} className="mt-5 space-y-4">
+
+              {/* الاسم */}
               <label className="block text-sm font-bold">
                 الاسم
                 <input
                   name="name"
                   value={form.name}
-                  onChange={onField}
-                  className="mt-2 h-12 w-full rounded-xl border border-[#e6dfd4] bg-[#fbf8f3] px-4 text-sm font-normal outline-none focus:border-[#d4893a]"
+                  onChange={handleChange}
+                  className="mt-2 w-full rounded-lg border p-3"
                 />
               </label>
+
+              {/* الوصف */}
               <label className="block text-sm font-bold">
                 الوصف
                 <textarea
                   name="description"
                   value={form.description}
-                  onChange={onField}
-                  rows={3}
-                  className="mt-2 w-full rounded-xl border border-[#e6dfd4] bg-[#fbf8f3] px-4 py-3 text-sm font-normal outline-none focus:border-[#d4893a]"
+                  onChange={handleChange}
+                  className="mt-2 w-full rounded-lg border p-3"
                 />
               </label>
-              <div className="grid gap-4 sm:grid-cols-2">
+
+              {/* السعر والمخزون */}
+              <div className="grid grid-cols-2 gap-3">
                 <label className="block text-sm font-bold">
                   السعر
                   <input
-                    name="price"
                     type="number"
-                    min="0"
-                    step="0.01"
+                    name="price"
                     value={form.price}
-                    onChange={onField}
-                    className="mt-2 h-12 w-full rounded-xl border border-[#e6dfd4] bg-[#fbf8f3] px-4 text-sm font-normal outline-none focus:border-[#d4893a]"
+                    onChange={handleChange}
+                    className="mt-2 w-full rounded-lg border p-3"
                   />
                 </label>
+
                 <label className="block text-sm font-bold">
                   المخزون
                   <input
-                    name="stock"
                     type="number"
-                    min="0"
-                    step="1"
+                    name="stock"
                     value={form.stock}
-                    onChange={onField}
-                    className="mt-2 h-12 w-full rounded-xl border border-[#e6dfd4] bg-[#fbf8f3] px-4 text-sm font-normal outline-none focus:border-[#d4893a]"
+                    onChange={handleChange}
+                    className="mt-2 w-full rounded-lg border p-3"
                   />
                 </label>
               </div>
+
+              {/* القسم */}
               <label className="block text-sm font-bold">
                 القسم
                 <input
                   name="category"
                   value={form.category}
-                  onChange={onField}
-                  className="mt-2 h-12 w-full rounded-xl border border-[#e6dfd4] bg-[#fbf8f3] px-4 text-sm font-normal outline-none focus:border-[#d4893a]"
+                  onChange={handleChange}
+                  className="mt-2 w-full rounded-lg border p-3"
                 />
               </label>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="flex items-center gap-2 text-sm font-bold">
-                  <input
-                    name="isActive"
-                    type="checkbox"
-                    checked={form.isActive}
-                    onChange={onField}
-                    className="size-4 accent-[#273746]"
-                  />
-                  منتج نشط
+
+              {/* صورة المنتج */}
+              <div>
+                <label className="block text-sm font-bold">
+                  صورة المنتج
                 </label>
-                <label className="flex items-center gap-2 text-sm font-bold">
-                  <input
-                    name="discountIsActive"
-                    type="checkbox"
-                    checked={form.discountIsActive}
-                    onChange={onField}
-                    className="size-4 accent-[#273746]"
+
+                {imagePreview && (
+                  <img
+                    src={imagePreview}
+                    alt="Product"
+                    className="my-3 h-36 w-36 rounded-lg border object-contain"
                   />
-                  خصم مفعّل
-                </label>
+                )}
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="mt-2 w-full text-sm"
+                />
               </div>
+
+              {/* حالة المنتج والخصم */}
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="isActive"
+                  checked={form.isActive}
+                  onChange={handleChange}
+                />
+                منتج نشط
+              </label>
+
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="discountIsActive"
+                  checked={form.discountIsActive}
+                  onChange={handleChange}
+                />
+                خصم مفعّل
+              </label>
+
               <label className="block text-sm font-bold">
                 نسبة الخصم
                 <input
-                  name="discountPercentage"
                   type="number"
+                  name="discountPercentage"
                   min="0"
                   max="100"
                   value={form.discountPercentage}
-                  onChange={onField}
-                  className="mt-2 h-12 w-full rounded-xl border border-[#e6dfd4] bg-[#fbf8f3] px-4 text-sm font-normal outline-none focus:border-[#d4893a]"
+                  onChange={handleChange}
+                  className="mt-2 w-full rounded-lg border p-3"
                 />
               </label>
 
-              {formError && <p className="text-sm text-[#8a4b3c]">{formError}</p>}
+              {error && (
+                <p className="text-sm text-red-600">{error}</p>
+              )}
 
-              <div className="flex gap-3 pt-1">
+              {/* أزرار الحفظ والإلغاء */}
+              <div className="flex gap-3">
                 <button
                   type="submit"
                   disabled={updateMutation.isPending}
-                  className="h-11 flex-1 rounded-xl bg-[#273746] text-sm font-bold text-white transition hover:bg-[#98764e] disabled:opacity-50"
+                  className="flex-1 rounded-lg bg-[#273746] p-3 text-white"
                 >
-                  {updateMutation.isPending ? "جاري الحفظ" : "حفظ التعديل"}
+                  {updateMutation.isPending ? "جاري الحفظ..." : "حفظ التعديل"}
                 </button>
+
                 <button
                   type="button"
                   onClick={closeEdit}
-                  className="h-11 rounded-xl border border-[#e6dfd4] px-5 text-sm font-bold text-[#273746]"
+                  className="rounded-lg border px-5"
                 >
                   إلغاء
                 </button>
               </div>
+
             </form>
           </div>
         </div>
